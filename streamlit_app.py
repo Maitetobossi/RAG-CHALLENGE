@@ -1,6 +1,7 @@
 from PIL import Image
 import pytesseract
 from langchain.schema import Document
+from datetime import datetime
 import streamlit as st
 import time
 import os
@@ -19,41 +20,90 @@ def load_image_text(image_path):
     text = pytesseract.image_to_string(image)
     return [Document(page_content=text)]
 
-st.set_page_config(page_title="Image2Answer", page_icon="🖼️", layout="wide")
-st.title("🖼️ Image2Answer - Visual Insight QA")
-st.markdown("Transform visual content into insights — ask, analyze, and get accurate answers in seconds.")
-
+st.set_page_config(page_title="Image2Answer", page_icon="./images/image.png", layout="wide")
+st.markdown("""
+<h1 style='color:#65c7b4; font-size: 2.5rem;'>
+    Image2Answer - Visual Insight QA
+</h1>
+<p style='color:#055e99; font-size: 1.2rem; margin-top: -10px;'>
+    Transform visual content into insights — ask, analyze, and get accurate answers in seconds.
+</p>
+""", unsafe_allow_html=True)
 # st.set_page_config(
-#     page_title="Image2Answer",
+#     page_title="Image2Answer",055e99
 #     page_icon="./images/image.png",
 #     layout="centered"
 # )
 
+# st.markdown("""
+# <style>
+# .message-box {
+#     padding: 1rem;
+#     border-radius: 12px;
+#     margin-bottom: 10px;
+#     max-width: 70%;
+#     word-break: break-word;
+# }
+# .user {
+#     background-color: #DCF8C6;
+#     align-self: flex-end;
+#     color: #000;
+#     margin-left: auto;
+# }
+# .assistant {
+#     background-color: #E8EAF6;
+#     align-self: flex-start;
+#     color: #000;
+#     margin-right: auto;
+# }
+# .message-container {
+#     display: flex;
+#     flex-direction: column;
+#     margin-top: 1rem;
+# }
+# </style>
+# """, unsafe_allow_html=True)
+
+
 st.markdown("""
 <style>
+.message-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1rem;
+}
+
 .message-box {
-    padding: 1rem;
+    padding: 0.75rem 1rem;
     border-radius: 12px;
     margin-bottom: 10px;
-    max-width: 70%;
+    display: inline-block;
+    max-width: 80%;
+    width: fit-content;
     word-break: break-word;
+    box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
+    position: relative;
 }
+
 .user {
-    background-color: #DCF8C6;
+    background-color: #65c7b4;
     align-self: flex-end;
     color: #000;
     margin-left: auto;
 }
+
 .assistant {
     background-color: #E8EAF6;
     align-self: flex-start;
     color: #000;
     margin-right: auto;
 }
-.message-container {
-    display: flex;
-    flex-direction: column;
-    margin-top: 1rem;
+
+.meta {
+    font-size: 0.75rem;
+    color: #555;
+    margin-bottom: 0.25rem;
+    font-style: italic;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -184,8 +234,16 @@ with st.sidebar:
 
 for message in st.session_state.messages:
     avatar = "🤖" if message["role"] == "assistant" else "👤"
+    role_label = "AI" if message["role"] == "assistant" else "You"
+    timestamp = datetime.now().strftime("%H:%M")
     with st.chat_message(message["role"], avatar=avatar):
-        st.write(message["content"])
+        st.markdown(
+            f"""
+            <div class="meta">{role_label} • {timestamp}</div>
+            <div class="message-box {message["role"]}">{message["content"]}</div>
+            """,
+            unsafe_allow_html=True
+        )
 
 
 def pipeline(prompt):
